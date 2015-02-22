@@ -35,12 +35,13 @@ public class WIBUP2Test {
 
 	@Test
 	public void canCreateChildNode() {
-		Children c = new Children(2, true);
 		int outDegree = 2;
+		int alphabetSize = 26;
+		Children c = new Children(outDegree, true);
 
 		assertEquals(c.outDegree, outDegree);
 		assertTrue(c.terminal);
-		assertEquals(c.node.length, outDegree);
+		assertEquals(c.node.length, alphabetSize);
 	}
 
 	@Test
@@ -66,7 +67,7 @@ public class WIBUP2Test {
 	public void canInsertTwoLetterWord() {
 		assertTrue(t.insert("as"));
 		t.listAll();
-		assertEquals("as", out.toString());
+		assertEquals("as\n", out.toString());
 		assertEquals(1, t.membership());
 		assertTrue(t.isPresent("as"));
 		assertTrue(t.head.node[0].terminal);
