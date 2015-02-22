@@ -42,7 +42,7 @@ class Trie {
         if (x.node[i] == null) {
             x.node[i] = new Children(1, false);
             return insert(suffix, x.node[i]);
-        } else if (x.node[i] != null) {
+        } else if (letterIsPresent(x, i)) {
             x.node[i].outDegree++;
             return insert(suffix, x.node[i]);
         } else
@@ -50,8 +50,23 @@ class Trie {
     }
 
     public boolean isPresent(String word) {
+        return isPresent(word, head);
+    }
+
+    private boolean isPresent(String word, Node x) {
+        if (word.length() == 1) {
+            int i = getFirstLetterIndex(word);
+            if (x.node[i] != null && x.node[i].terminal)
+                return true;
+            else
+                return false;
+        }
+
         int i = getFirstLetterIndex(word);
-        return head.node[i] != null;
+        String suffix = word.substring(1);
+        if (letterIsPresent(x, i))
+            return isPresent(suffix, x.node[i]);
+        else return false;
     }
 
     public boolean delete(String word) {
@@ -99,7 +114,7 @@ class Trie {
     }
 
     private boolean isNonTerminalChar(Node x, int i) {
-        return x != null && x.node[i] != null && !x.node[i].terminal;
+        return x != null && letterIsPresent(x, i) && !x.node[i].terminal;
     }
 
     private char getLetter(int i) {
@@ -107,7 +122,11 @@ class Trie {
     }
 
     private boolean isTerminalChar(Node x, int i) {
-        return x != null && x.node[i] != null && x.node[i].terminal;
+        return x != null && letterIsPresent(x, i) && x.node[i].terminal;
+    }
+
+    private boolean letterIsPresent(Node x, int i) {
+        return x.node[i] != null;
     }
 }
 
