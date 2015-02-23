@@ -50,23 +50,24 @@ class Trie {
     }
 
     public boolean isPresent(String word) {
-        return isPresent(word, head);
-    }
+        Node current = head;
 
-    private boolean isPresent(String word, Node x) {
-        if (word.length() == 1) {
-            int i = getFirstLetterIndex(word);
-            if (x.node[i] != null && x.node[i].terminal)
+        while (word.length() > 0) {
+            int firstLetterIndex = getFirstLetterIndex(word);
+            word = (word.length() > 0) ? word.substring(1) : "";
+
+            if (word.length() == 0 && isTerminal(current, firstLetterIndex))
                 return true;
+            else if (letterIsPresent(current, firstLetterIndex))
+                current = current.node[firstLetterIndex];
             else
                 return false;
         }
+        return false;
+    }
 
-        int i = getFirstLetterIndex(word);
-        String suffix = word.substring(1);
-        if (letterIsPresent(x, i))
-            return isPresent(suffix, x.node[i]);
-        else return false;
+    private boolean isTerminal(Node x, int i) {
+        return x.node[i] != null && x.node[i].terminal;
     }
 
     public boolean delete(String word) {
@@ -90,8 +91,7 @@ class Trie {
     }
 
     public void listAll() {
-        Node headCopy = head;
-        listAll(headCopy);
+        listAll(head);
     }
 
     private void listAll(Node x) {
@@ -131,4 +131,7 @@ class Trie {
 }
 
 public class WIBUP2 {
+    public static void main(String[] args) {
+
+    }
 }
