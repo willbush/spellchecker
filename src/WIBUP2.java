@@ -1,7 +1,7 @@
 class Node {
     protected static final int ALPHABET_SIZE = 26;
-    int outDegree;
-    boolean terminal;
+    int outDegree; // the number of children a node has
+    boolean terminal; // true if node represents the last letter in a word
     Children[] node;
 
     Node() {
@@ -33,7 +33,7 @@ class Trie {
     private boolean insert(String word, Node x) {
         if (word.length() == 1) {
             int i = getFirstLetterIndex(word);
-            x.node[i] = new Children(1, true);
+            x.node[i] = new Children(0, true);
             return true;
         }
 
@@ -43,10 +43,16 @@ class Trie {
             x.node[i] = new Children(1, false);
             return insert(suffix, x.node[i]);
         } else if (letterIsPresent(x, i)) {
-            x.node[i].outDegree++;
+            updateOutDegree(x, i, suffix);
             return insert(suffix, x.node[i]);
         } else
             return false;
+    }
+
+    private void updateOutDegree(Node x, int i, String suffix) {
+        int nextLetter = getFirstLetterIndex(suffix);
+        if (!letterIsPresent(x.node[i], nextLetter))
+            x.node[i].outDegree++;
     }
 
     public boolean isPresent(String word) {
