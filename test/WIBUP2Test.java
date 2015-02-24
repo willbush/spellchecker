@@ -34,17 +34,6 @@ public class WIBUP2Test {
     }
 
     @Test
-    public void canCreateChildNode() {
-        int outDegree = 2;
-        int alphabetSize = 26;
-        Children c = new Children(outDegree, true);
-
-        assertEquals(outDegree, c.outDegree);
-        assertTrue(c.terminal);
-        assertEquals(alphabetSize, c.node.length);
-    }
-
-    @Test
     public void canInsertSimpleLetter() {
         assertTrue(t.insert("a"));
         assertEquals(1, t.membership());
@@ -85,6 +74,7 @@ public class WIBUP2Test {
         assertTrue(t.insert("tom"));
         assertTrue(t.head.node[getIndex('t')].node[getIndex('o')].node[getIndex('m')].terminal);
         assertTrue(t.insert("cat"));
+        assertEquals(2, t.membership());
         t.listAll(); // prints alphabetically
         assertEquals("cat\ntom\n", out.toString());
     }
@@ -94,6 +84,8 @@ public class WIBUP2Test {
         assertTrue(t.insert("alice"));
         assertTrue(t.insert("bob"));
         assertTrue(t.insert("joe"));
+        assertEquals(3, t.membership());
+        assertEquals(3, t.head.outDegree);
         t.listAll(); // prints alphabetically
         assertEquals("alice\nbob\njoe\n", out.toString());
     }
@@ -108,6 +100,7 @@ public class WIBUP2Test {
         assertTrue(t.isPresent("vidi"));
         assertTrue(t.isPresent("veni"));
         assertTrue(t.isPresent("vici"));
+        assertEquals(3, t.membership());
         assertEquals(2, t.head.node[getIndex('v')].outDegree);
         t.listAll(); // prints alphabetically
         //assertEquals("veni\nvici\nvidi", out.toString());
@@ -119,6 +112,7 @@ public class WIBUP2Test {
         assertTrue(t.insert("abcf"));
         assertTrue(t.insert("abcg"));
         assertTrue(t.insert("abch"));
+        assertEquals(4, t.membership());
 
         assertTrue(t.isPresent("abce"));
         assertTrue(t.isPresent("abcf"));
@@ -127,6 +121,72 @@ public class WIBUP2Test {
 
         Node c = t.head.node[getIndex('a')].node[getIndex('b')].node[getIndex('c')];
         assertEquals(4, c.outDegree);
+    }
+
+    @Test
+    public void testComplexTree() {
+        assertTrue(t.insert("the"));
+        assertTrue(t.insert("thin"));
+        assertTrue(t.insert("tint"));
+        assertTrue(t.insert("song"));
+        assertTrue(t.insert("so"));
+        assertTrue(t.insert("son"));
+        assertTrue(t.insert("sing"));
+        assertTrue(t.insert("sin"));
+
+        // check membership and presence
+        assertEquals(8, t.membership());
+        assertTrue(t.isPresent("the"));
+        assertTrue(t.isPresent("thin"));
+        assertTrue(t.isPresent("tint"));
+        assertTrue(t.isPresent("song"));
+        assertTrue(t.isPresent("so"));
+        assertTrue(t.isPresent("son"));
+        assertTrue(t.isPresent("sing"));
+        assertTrue(t.isPresent("sin"));
+
+        // verify not present
+        assertFalse(t.isPresent("s"));
+        assertFalse(t.isPresent("si"));
+        assertFalse(t.isPresent("th"));
+        assertFalse(t.isPresent("tin"));
+
+        // test "the"
+        Node t2 = t.head.node[getIndex('t')];
+        Node th = t.head.node[getIndex('t')].node[getIndex('h')];
+        Node the = t.head.node[getIndex('t')].node[getIndex('h')].node[getIndex('e')];
+        assertEquals(2, t.head.outDegree); // out is 't' and 's'
+        assertEquals(2, th.outDegree);
+        assertEquals(0, the.outDegree);
+
+        // test terminal for "the"
+        assertFalse(t2.terminal);
+        assertFalse(th.terminal);
+        assertTrue(the.terminal);
+
+        // test "song" out degree
+        Node s = t.head.node[getIndex('s')];
+        Node so = t.head.node[getIndex('s')].node[getIndex('o')];
+        Node son = t.head.node[getIndex('s')].node[getIndex('o')].node[getIndex('n')];
+        Node song = t.head.node[getIndex('s')].node[getIndex('o')].node[getIndex('n')].node[getIndex('g')];
+        assertEquals(2, s.outDegree);
+        assertEquals(1, so.outDegree);
+        assertEquals(1, son.outDegree);
+        assertEquals(0, song.outDegree);
+
+        // test "song"
+        Node si = t.head.node[getIndex('s')].node[getIndex('i')];
+        Node sin = t.head.node[getIndex('s')].node[getIndex('i')].node[getIndex('n')];
+        Node sing = t.head.node[getIndex('s')].node[getIndex('i')].node[getIndex('n')].node[getIndex('g')];
+        assertEquals(1, si.outDegree);
+        assertEquals(1, sin.outDegree);
+        assertEquals(0, sing.outDegree);
+
+        // test terminal for "song"
+        assertFalse(s.terminal);
+        assertTrue(so.terminal);
+        assertTrue(son.terminal);
+        assertTrue(song.terminal);
     }
 
     private int getIndex(char c) {

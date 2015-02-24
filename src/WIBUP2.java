@@ -21,38 +21,44 @@ class Children extends Node {
 
 class Trie {
     Node head;
+    private int membership = 0;
 
     Trie() {
         head = new Node();
     }
 
     public boolean insert(String word) {
-        return insert(word, head);
+        boolean placed = insert(word, head);
+        if (placed)
+            membership++;
+        return placed;
     }
 
     private boolean insert(String word, Node x) {
-        if (word.length() == 1) {
-            int i = getFirstLetterIndex(word);
-            x.node[i] = new Children(0, true);
-            return true;
-        }
+        if (word.length() == 1)
+            return insertLastLetter(word, x);
 
         int i = getFirstLetterIndex(word);
         String suffix = word.substring(1);
         if (x.node[i] == null) {
-            x.node[i] = new Children(1, false);
-            return insert(suffix, x.node[i]);
-        } else if (letterIsPresent(x, i)) {
-            updateOutDegree(x, i, suffix);
-            return insert(suffix, x.node[i]);
-        } else
-            return false;
+            x.node[i] = new Children(0, false);
+            x.outDegree++;
+        }
+        return insert(suffix, x.node[i]);
     }
 
-    private void updateOutDegree(Node x, int i, String suffix) {
-        int nextLetter = getFirstLetterIndex(suffix);
-        if (!letterIsPresent(x.node[i], nextLetter))
-            x.node[i].outDegree++;
+    private boolean insertLastLetter(String word, Node x) {
+        int i = getFirstLetterIndex(word);
+        if (isTerminal(x, i))
+            return false; // word already inserted
+        else if (letterIsPresent(x, i)) {
+            x.node[i].terminal = true;
+            return true;
+        } else {
+            x.node[i] = new Children(0, true);
+            x.outDegree++;
+            return true;
+        }
     }
 
     public boolean isPresent(String word) {
@@ -79,21 +85,14 @@ class Trie {
     public boolean delete(String word) {
         int i = getFirstLetterIndex(word);
         head.node[i] = null;
-        return head.node[i] == null;
+        boolean removed = head.node[i] == null;
+        if (removed)
+            membership--;
+        return removed;
     }
 
     private int getFirstLetterIndex(String word) {
         return word.charAt(0) - 97;
-    }
-
-    public int membership() {
-        int count = 0;
-        for (Children c : head.node) {
-            if (c != null)
-                count++;
-        }
-
-        return count;
     }
 
     public void listAll() {
@@ -133,6 +132,10 @@ class Trie {
 
     private boolean letterIsPresent(Node x, int i) {
         return x.node[i] != null;
+    }
+
+    public int membership() {
+        return membership;
     }
 }
 
