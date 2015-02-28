@@ -92,7 +92,7 @@ class Trie {
     }
 
     private int getFirstLetterIndex(String word) {
-        return word.charAt(0) - 97;
+        return word.charAt(0) - 'a';
     }
 
     public void listAll() {
@@ -123,7 +123,7 @@ class Trie {
     }
 
     private char getLetter(int i) {
-        return (char) (97 + i);
+        return (char) ('a' + i);
     }
 
     private boolean isTerminalChar(Node x, int i) {
