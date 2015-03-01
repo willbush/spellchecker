@@ -52,6 +52,7 @@ class Trie {
 
     private boolean insertLastLetter(String word, Node x) {
         int i = getFirstLetterIndex(word);
+
         if (isTerminal(x, i))
             return false; // word already inserted
         else if (letterIsPresent(x, i)) {
@@ -109,20 +110,22 @@ class Trie {
 
         while (outFound < x.outDegree) {
             if (letterIsPresent(x, i)) {
-                if (isTerminalWithOutDegree(x, i)) {
-                    String completeWord = s + getLetter(i);
-                    addToDictionary(completeWord);
-                    buildDictionary(x.node[i], completeWord);
-                } else if (isTerminal(x, i)) {
-                    String completeWord = s + getLetter(i);
-                    addToDictionary(completeWord);
-                } else
-                    buildDictionary(x.node[i], s + getLetter(i));
-
+                String possibleWord = s + getLetter(i);
+                processPossibleWord(x, possibleWord, i);
                 outFound++;
             }
             i++;
         }
+    }
+
+    private void processPossibleWord(Node x, String s, int i) {
+        if (isTerminalWithOutDegree(x, i)) {
+            addToDictionary(s);
+            buildDictionary(x.node[i], s);
+        } else if (isTerminal(x, i))
+            addToDictionary(s);
+        else
+            buildDictionary(x.node[i], s);
     }
 
     private void addToDictionary(String word) {
