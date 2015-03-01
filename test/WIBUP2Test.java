@@ -107,7 +107,7 @@ public class WIBUP2Test {
         assertEquals(3, t.membership());
 
         t.listAll(); // prints alphabetically
-        //assertEquals("veni\nvici\nvidi", out.toString()); // listAll not fully implemented yet
+        assertEquals("veni\nvici\nvidi\n", out.toString());
     }
 
     @Test
@@ -145,6 +145,11 @@ public class WIBUP2Test {
         boolean[] singTerminals = {false, false, true, true};
         testOutDegreeAndTerminal("song", OutDegrees, songTerminals);
         testOutDegreeAndTerminal("sing", OutDegrees, singTerminals);
+
+        // test if can list alphabetically
+        String expectedList = "sin\nsing\nso\nson\nsong\nthe\nthin\ntint\n";
+        t.listAll();
+        assertEquals(expectedList, out.toString());
     }
 
     private Node getLastNodeOf(String word) {

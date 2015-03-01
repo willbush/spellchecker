@@ -22,6 +22,9 @@ class Children extends Node {
 class Trie {
     Node head;
     private int membership = 0;
+    // initialized and used by listAll to build the current dictionary of words in the Trie.
+    private String[] dictionary;
+    private int dictIndex;
 
     Trie() {
         head = new Node();
@@ -39,12 +42,12 @@ class Trie {
             return insertLastLetter(word, x);
 
         int i = getFirstLetterIndex(word);
-        String suffix = word.substring(1);
+        String prefix = word.substring(1);
         if (x.node[i] == null) {
             x.node[i] = new Children(0, false);
             x.outDegree++;
         }
-        return insert(suffix, x.node[i]);
+        return insert(prefix, x.node[i]);
     }
 
     private boolean insertLastLetter(String word, Node x) {
@@ -78,10 +81,6 @@ class Trie {
         return false;
     }
 
-    private boolean isTerminal(Node x, int i) {
-        return x.node[i] != null && x.node[i].terminal;
-    }
-
     public boolean delete(String word) {
         int i = getFirstLetterIndex(word);
         head.node[i] = null;
@@ -96,38 +95,51 @@ class Trie {
     }
 
     public void listAll() {
-        listAll(head);
+        dictIndex = 0;
+        dictionary = new String[membership];
+        buildDictionary(head, "");
+
+        for (String word : dictionary)
+            System.out.println(word);
     }
 
-    private void listAll(Node x) {
-        for (int i = 0; i < 26; i++) {
-            if (isMultipleDegreeChar(x, i)) {
-                System.out.print(getLetter(i));
-                listAll(x.node[i]);
-            } else if (isNonTerminalChar(x, i)) {
-                System.out.print(getLetter(i));
-                listAll(x.node[i]);
-            } else if (isTerminalChar(x, i)) {
-                System.out.println(getLetter(i));
-                listAll(x.node[i]);
+    private void buildDictionary(Node x, String s) {
+        int i = 0;
+        int outFound = 0;
+
+        while (outFound < x.outDegree) {
+            if (letterIsPresent(x, i)) {
+                if (isTerminalWithOutDegree(x, i)) {
+                    String completeWord = s + getLetter(i);
+                    addToDictionary(completeWord);
+                    buildDictionary(x.node[i], completeWord);
+                } else if (isTerminal(x, i)) {
+                    String completeWord = s + getLetter(i);
+                    addToDictionary(completeWord);
+                } else
+                    buildDictionary(x.node[i], s + getLetter(i));
+
+                outFound++;
             }
+            i++;
         }
     }
 
-    private boolean isMultipleDegreeChar(Node x, int i) {
-        return isNonTerminalChar(x, i) && x.node[i].outDegree > 1;
+    private void addToDictionary(String word) {
+        dictionary[dictIndex] = word;
+        dictIndex++;
     }
 
-    private boolean isNonTerminalChar(Node x, int i) {
-        return x != null && letterIsPresent(x, i) && !x.node[i].terminal;
+    private boolean isTerminalWithOutDegree(Node x, int i) {
+        return isTerminal(x, i) && x.node[i].outDegree > 0;
+    }
+
+    private boolean isTerminal(Node x, int i) {
+        return x.node[i] != null && x.node[i].terminal;
     }
 
     private char getLetter(int i) {
         return (char) ('a' + i);
-    }
-
-    private boolean isTerminalChar(Node x, int i) {
-        return x != null && letterIsPresent(x, i) && x.node[i].terminal;
     }
 
     private boolean letterIsPresent(Node x, int i) {
