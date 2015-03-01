@@ -25,6 +25,7 @@ class Trie {
     // initialized and used by listAll to build the current dictionary of words in the Trie.
     private String[] dictionary;
     private int dictIndex;
+    private boolean wordDeleted;
 
     Trie() {
         head = new Node();
@@ -70,7 +71,7 @@ class Trie {
 
         while (word.length() > 0) {
             int firstLetterIndex = getFirstLetterIndex(word);
-            word = (word.length() > 0) ? word.substring(1) : "";
+            word = word.substring(1);
 
             if (word.length() == 0 && isTerminal(current, firstLetterIndex))
                 return true;
@@ -83,12 +84,54 @@ class Trie {
     }
 
     public boolean delete(String word) {
-        int i = getFirstLetterIndex(word);
-        head.node[i] = null;
-        boolean removed = head.node[i] == null;
+        wordDeleted = false;
+        boolean removed = delete(head, word);
         if (removed)
             membership--;
         return removed;
+    }
+
+    private boolean delete(Node x, String word) {
+        boolean delete = false;
+
+        if (word.length() == 1) {
+            int i = getFirstLetterIndex(word);
+            if (letterIsPresent(x, i)) {
+                if (isTerminal(x, i) && x.node[i].outDegree > 0) {
+                    x.node[i].terminal = false;
+                    wordDeleted = true;
+                    delete = true;
+                } else if (isTerminal(x, i)) {
+                    x.node[i] = null;
+                    delete = true;
+                }
+            }
+            return delete;
+        }
+
+        if (word.length() > 0) {
+            int i = getFirstLetterIndex(word);
+            if (letterIsPresent(x, i)) {
+                delete = delete(x.node[i], word.substring(1));
+
+                if (!wordDeleted && delete) {
+                    if (isTerminal(x, i) || x.node[i].outDegree > 1) {
+                        x.node[i].outDegree--;
+                        delete = true;
+                        wordDeleted = true;
+                    } else if (x == head) {
+                        x.outDegree--;
+                        x.node[i] = null;
+                        delete = true;
+                        wordDeleted = true;
+                    } else {
+                        x.node[i] = null;
+                        delete = true;
+                    }
+                }
+            }
+        }
+        return delete;
     }
 
     private int getFirstLetterIndex(String word) {

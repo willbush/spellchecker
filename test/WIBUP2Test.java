@@ -10,11 +10,11 @@ import static org.junit.Assert.*;
 
 public class WIBUP2Test {
     private final ByteArrayOutputStream out = new ByteArrayOutputStream();
-    private Trie t;
+    private Trie trie;
 
     @Before
     public void arrange() {
-        t = new Trie();
+        trie = new Trie();
         System.setOut(new PrintStream(out));
     }
 
@@ -34,39 +34,28 @@ public class WIBUP2Test {
     }
 
     @Test
-    public void canInsertSimpleLetter() {
-        assertTrue(t.insert("a"));
-        assertEquals(1, t.membership());
-        assertTrue(t.insert("z"));
-        assertEquals(2, t.membership());
-
-        assertTrue(t.isPresent("a"));
-        assertTrue(t.isPresent("z"));
-
-        assertTrue(t.delete("a"));
-        assertEquals(1, t.membership());
-        assertTrue(t.delete("z"));
-        assertEquals(0, t.membership());
-
-        assertFalse(t.isPresent("a"));
-        assertFalse(t.isPresent("z"));
+    public void canListEmptyTrie() {
+        trie.listAll();
+        assertEquals("", out.toString());
     }
 
     @Test
-    public void canInsertAndRemoveTwoLetterWord() {
-        assertTrue(t.insert("as"));
-        t.listAll();
-        assertEquals("as\n", out.toString());
-        assertEquals(1, t.membership());
+    public void canInsertSimpleLetter() {
+        assertTrue(trie.insert("a"));
+        assertEquals(1, trie.membership());
+        assertTrue(trie.insert("z"));
+        assertEquals(2, trie.membership());
 
-        assertTrue(t.isPresent("as"));
+        assertTrue(trie.isPresent("a"));
+        assertTrue(trie.isPresent("z"));
 
-        assertFalse(t.head.node[0].terminal);
-        assertTrue(t.head.node[0].node[getIndex('s')].terminal);
+        assertTrue(trie.delete("a"));
+        assertEquals(1, trie.membership());
+        assertTrue(trie.delete("z"));
+        assertEquals(0, trie.membership());
 
-        assertTrue(t.delete("as"));
-        assertFalse(t.isPresent("as"));
-        assertEquals(0, t.membership());
+        assertFalse(trie.isPresent("a"));
+        assertFalse(trie.isPresent("z"));
     }
 
     @Test
@@ -75,8 +64,8 @@ public class WIBUP2Test {
         insertAndAssert(words, true);
         Node m = getLastNodeOf("tom");
         assertTrue(m.terminal);
-        assertEquals(2, t.membership());
-        t.listAll(); // prints alphabetically
+        assertEquals(2, trie.membership());
+        trie.listAll(); // prints alphabetically
         assertEquals("cat\ntom\n", out.toString());
     }
 
@@ -87,10 +76,10 @@ public class WIBUP2Test {
         insertAndAssert(words, true);
         insertAndAssert(words, false); // inserting the same words should fail
         assertIsPresent(words, true);
-        assertEquals(3, t.membership());
-        assertEquals(3, t.head.outDegree);
+        assertEquals(3, trie.membership());
+        assertEquals(3, trie.head.outDegree);
 
-        t.listAll(); // prints alphabetically
+        trie.listAll(); // prints alphabetically
         assertEquals("alice\nbob\njoe\n", out.toString());
     }
 
@@ -101,12 +90,12 @@ public class WIBUP2Test {
         insertAndAssert(words, true);
         assertIsPresent(words, true);
 
-        int[] outDegree = {2, 2, 1, 0};
-        boolean[] terminals = {false, false, false, true};
+        int[] outDegree = {1, 2, 2, 1, 0};
+        boolean[] terminals = {false, false, false, false, true};
         testOutDegreeAndTerminal("vidi", outDegree, terminals);
-        assertEquals(3, t.membership());
+        assertEquals(3, trie.membership());
 
-        t.listAll(); // prints alphabetically
+        trie.listAll(); // prints alphabetically
         assertEquals("veni\nvici\nvidi\n", out.toString());
     }
 
@@ -116,7 +105,7 @@ public class WIBUP2Test {
         insertAndAssert(words, true);
         insertAndAssert(words, false);
         assertIsPresent(words, true);
-        assertEquals(4, t.membership());
+        assertEquals(4, trie.membership());
 
 
         Node c = getLastNodeOf("abc");
@@ -124,36 +113,115 @@ public class WIBUP2Test {
     }
 
     @Test
-    public void testComplexTree() {
-        String[] words = {"the", "thin", "tint", "song", "so", "son", "sing", "sin"};
+    public void canDeleteTwoBranchingWords() {
+        assertTrue(trie.insert("as"));
+        assertTrue(trie.insert("at"));
+        assertEquals(2, trie.membership());
+
+        assertTrue(trie.delete("as"));
+        assertFalse(trie.isPresent("as"));
+        assertTrue(trie.isPresent("at"));
+
+        assertTrue(trie.delete("at"));
+        assertFalse(trie.isPresent("at"));
+        assertFalse(trie.isPresent("as"));
+        assertEquals(0, trie.membership());
+    }
+
+    @Test
+    public void testComplexTreeInsertions() {
+        String[] words = {"the", "tin", "thin", "tint", "song", "so", "son", "sing", "sin"};
         insertAndAssert(words, true);
         insertAndAssert(words, false);
         assertIsPresent(words, true);
 
-        String[] nonInsertedWords = {"th", "thi", "tin", "s"};
+        String[] nonInsertedWords = {"th", "thi", "ti", "s"};
         assertIsPresent(nonInsertedWords, false);
 
-        assertEquals(8, t.membership());
+        assertEquals(9, trie.membership());
 
-        int[] theOutDegrees = {2, 2, 0};
-        boolean[] theTerminals = {false, false, true};
+        int[] theOutDegrees = {2, 2, 2, 0};
+        boolean[] theTerminals = {false, false, false, true};
         testOutDegreeAndTerminal("the", theOutDegrees, theTerminals);
 
         // "sing" and "song" share the same out degrees
-        int[] OutDegrees = {2, 1, 1, 0};
-        boolean[] songTerminals = {false, true, true, true};
-        boolean[] singTerminals = {false, false, true, true};
+        int[] OutDegrees = {2, 2, 1, 1, 0};
+        boolean[] songTerminals = {false, false, true, true, true};
+        boolean[] singTerminals = {false, false, false, true, true};
         testOutDegreeAndTerminal("song", OutDegrees, songTerminals);
         testOutDegreeAndTerminal("sing", OutDegrees, singTerminals);
 
         // test if can list alphabetically
-        String expectedList = "sin\nsing\nso\nson\nsong\nthe\nthin\ntint\n";
-        t.listAll();
+        String expectedList = "sin\nsing\nso\nson\nsong\nthe\nthin\ntin\ntint\n";
+        trie.listAll();
+        assertEquals(expectedList, out.toString());
+    }
+
+    @Test
+    public void testComplexTreeDeletions() {
+        String[] words = {"the", "tin", "thin", "tint", "song", "so", "son", "sing", "sin"};
+        insertAndAssert(words, true);
+
+        // delete son
+        String expectedList = "sin\nsing\nso\nsong\nthe\nthin\ntin\ntint\n";
+        deleteWord("son", expectedList);
+        assertTrue(trie.isPresent("song"));
+
+        // delete so
+        expectedList = "sin\nsing\nsong\nthe\nthin\ntin\ntint\n";
+        deleteWord("so", expectedList);
+        assertTrue(trie.isPresent("song"));
+
+        // delete song
+        expectedList = "sin\nsing\nthe\nthin\ntin\ntint\n";
+        deleteWord("song", expectedList);
+        int[] OutDegrees = {2, 1, 1, 1, 0};
+        boolean[] singTerminals = {false, false, false, true, true};
+        testOutDegreeAndTerminal("sing", OutDegrees, singTerminals);
+
+        // delete the
+        expectedList = "sin\nsing\nthin\ntin\ntint\n";
+        deleteWord("the", expectedList);
+        int[] thinOutDegrees = {2, 2, 1, 1, 0};
+        boolean[] thinTerminals = {false, false, false, false, true};
+        testOutDegreeAndTerminal("thin", thinOutDegrees, thinTerminals);
+
+        // check membership
+        assertEquals(5, trie.membership());
+
+        // delete thin
+        expectedList = "sin\nsing\ntin\ntint\n";
+        deleteWord("thin", expectedList);
+        int[] tintOutDegrees = {2, 1, 1, 1, 0};
+        boolean[] tintTerminals = {false, false, false, true, true};
+        testOutDegreeAndTerminal("tint", tintOutDegrees, tintTerminals);
+
+        // delete sin
+        expectedList = "sing\ntin\ntint\n";
+        deleteWord("sin", expectedList);
+        int[] singOutDegrees = {2, 1, 1, 1, 0};
+        boolean[] singTerminals2 = {false, false, false, false, true};
+        testOutDegreeAndTerminal("sing", singOutDegrees, singTerminals2);
+
+        // delete sing
+        expectedList = "tin\ntint\n";
+        deleteWord("sing", expectedList);
+        int[] tinOutDegrees = {1, 1, 1, 1, 0};
+        boolean[] tinTerminals = {false, false, false, false, true};
+        testOutDegreeAndTerminal("tin", tinOutDegrees, tinTerminals);
+    }
+
+    private void deleteWord(String word, String expectedList) {
+        assertTrue(trie.delete(word));
+        assertFalse(trie.delete(word));
+        assertFalse(trie.isPresent(word));
+        out.reset();
+        trie.listAll();
         assertEquals(expectedList, out.toString());
     }
 
     private Node getLastNodeOf(String word) {
-        Node current = t.head;
+        Node current = trie.head;
 
         while (word.length() > 0) {
             int firstLetterIndex = getFirstLetterIndex(word);
@@ -169,24 +237,24 @@ public class WIBUP2Test {
 
     private void insertAndAssert(String[] words, boolean b) {
         for (String word : words)
-            assertEquals(b, t.insert(word));
+            assertEquals(b, trie.insert(word));
     }
 
     private void assertIsPresent(String[] words, boolean b) {
         for (String word : words)
-            assertEquals(b, t.isPresent(word));
+            assertEquals(b, trie.isPresent(word));
     }
 
     private void testOutDegreeAndTerminal(String word, int[] outDegrees, boolean[] terminals) {
         int i = 0;
-        Node current = t.head;
+        Node current = trie.head;
 
         while (word.length() > 0) {
             int firstLetterIndex = getFirstLetterIndex(word);
-            current = current.node[firstLetterIndex];
             assertEquals(outDegrees[i], current.outDegree);
             assertEquals(terminals[i], current.terminal);
             word = word.substring(1);
+            current = current.node[firstLetterIndex];
             i++;
         }
     }
