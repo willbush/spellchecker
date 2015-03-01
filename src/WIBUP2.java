@@ -32,7 +32,7 @@ class Trie {
     }
 
     public boolean insert(String word) {
-        boolean placed = insert(word, head);
+        boolean placed = word.length() > 0 && insert(word, head);
         if (placed)
             membership++;
         return placed;
@@ -92,46 +92,56 @@ class Trie {
     }
 
     private boolean delete(Node x, String word) {
-        boolean delete = false;
+        if (word.length() == 1)
+            return deleteLastLetter(x, word);
+        return word.length() > 0 && deletePrefixLetters(x, word);
+    }
 
-        if (word.length() == 1) {
-            int i = getFirstLetterIndex(word);
-            if (letterIsPresent(x, i)) {
-                if (isTerminal(x, i) && x.node[i].outDegree > 0) {
-                    x.node[i].terminal = false;
+    private boolean deletePrefixLetters(Node x, String word) {
+        boolean lastLetterDeleted = false;
+        int i = getFirstLetterIndex(word);
+        if (letterIsPresent(x, i)) {
+            lastLetterDeleted = delete(x.node[i], word.substring(1));
+
+            if (!wordDeleted && lastLetterDeleted) {
+                if (isTerminal(x, i) || x.node[i].outDegree > 1) {
+                    x.node[i].outDegree--;
+                    lastLetterDeleted = true;
                     wordDeleted = true;
-                    delete = true;
-                } else if (isTerminal(x, i)) {
+                } else if (x == head) {
+                    deleteHeadLetter(x, i);
+                    lastLetterDeleted = true;
+                } else {
                     x.node[i] = null;
-                    delete = true;
-                }
-            }
-            return delete;
-        }
-
-        if (word.length() > 0) {
-            int i = getFirstLetterIndex(word);
-            if (letterIsPresent(x, i)) {
-                delete = delete(x.node[i], word.substring(1));
-
-                if (!wordDeleted && delete) {
-                    if (isTerminal(x, i) || x.node[i].outDegree > 1) {
-                        x.node[i].outDegree--;
-                        delete = true;
-                        wordDeleted = true;
-                    } else if (x == head) {
-                        x.outDegree--;
-                        x.node[i] = null;
-                        delete = true;
-                        wordDeleted = true;
-                    } else {
-                        x.node[i] = null;
-                        delete = true;
-                    }
+                    lastLetterDeleted = true;
                 }
             }
         }
-        return delete;
+        return lastLetterDeleted;
+    }
+
+    private boolean deleteLastLetter(Node x, String word) {
+        int i = getFirstLetterIndex(word);
+        if (isTerminal(x, i) && x.node[i].outDegree > 0) {
+            x.node[i].terminal = false;
+            wordDeleted = true;
+            return true;
+        } else if (x == head) {
+            deleteHeadLetter(x, i);
+            return true;
+        } else if (isTerminal(x, i)) {
+            x.node[i] = null;
+            return true;
+        }
+        return false;
+    }
+
+    private void deleteHeadLetter(Node x, int i) {
+        boolean lastLetterDeleted;
+        x.outDegree--;
+        x.node[i] = null;
+        lastLetterDeleted = true;
+        wordDeleted = true;
     }
 
     private int getFirstLetterIndex(String word) {
@@ -162,7 +172,7 @@ class Trie {
     }
 
     private void processPossibleWord(Node x, String s, int i) {
-        if (isTerminalWithOutDegree(x, i)) {
+        if (isTerminal(x, i) && x.node[i].outDegree > 0) {
             addToDictionary(s);
             buildDictionary(x.node[i], s);
         } else if (isTerminal(x, i))
@@ -174,10 +184,6 @@ class Trie {
     private void addToDictionary(String word) {
         dictionary[dictIndex] = word;
         dictIndex++;
-    }
-
-    private boolean isTerminalWithOutDegree(Node x, int i) {
-        return isTerminal(x, i) && x.node[i].outDegree > 0;
     }
 
     private boolean isTerminal(Node x, int i) {

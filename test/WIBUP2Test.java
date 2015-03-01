@@ -40,6 +40,11 @@ public class WIBUP2Test {
     }
 
     @Test
+    public void insertNothingDoesNothing() {
+        assertFalse(trie.insert(""));
+    }
+
+    @Test
     public void canInsertSimpleLetter() {
         assertTrue(trie.insert("a"));
         assertEquals(1, trie.membership());
@@ -110,6 +115,20 @@ public class WIBUP2Test {
 
         Node c = getLastNodeOf("abc");
         assertEquals(4, c.outDegree);
+    }
+
+    @Test
+    public void deleteNothingDoesNothing() {
+        assertFalse(trie.delete(""));
+    }
+
+    @Test
+    public void canDeleteALetter() {
+        assertTrue(trie.insert("a"));
+        assertTrue(trie.delete("a"));
+        assertEquals(0, trie.membership());
+        assertEquals(0, trie.head.outDegree);
+        assertFalse(trie.head.terminal);
     }
 
     @Test
