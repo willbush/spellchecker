@@ -228,6 +228,21 @@ public class TrieTest {
         int[] tinOutDegrees = {1, 1, 1, 1, 0};
         boolean[] tinTerminals = {false, false, false, false, true};
         testOutDegreeAndTerminal("tin", tinOutDegrees, tinTerminals);
+
+        // delete tin
+        expectedList = "tint\n";
+        deleteWord("tin", expectedList);
+        int[] tintOutDegrees2 = {1, 1, 1, 1, 1, 0};
+        boolean[] tintTerminals2 = {false, false, false, false, false, true};
+        testOutDegreeAndTerminal("tint", tintOutDegrees2, tintTerminals2);
+
+        // delete tint
+        expectedList = "";
+        deleteWord("tint", expectedList);
+        assertEquals(0, trie.head.outDegree);
+        assertFalse(trie.head.terminal);
+        assertEquals(0, trie.membership());
+
     }
 
     private void deleteWord(String word, String expectedList) {

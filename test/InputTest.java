@@ -8,13 +8,17 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class InputTest {
     private final ByteArrayOutputStream out = new ByteArrayOutputStream();
     private WIBUP2 program;
+    private Trie trie;
 
     @Before
     public void arrange() {
+        trie = new Trie();
         System.setOut(new PrintStream(out));
     }
 
@@ -68,5 +72,30 @@ public class InputTest {
     private String getOutputString(String path) throws IOException {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
         return new String(encoded, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    public void memoryStress() throws IOException {
+        File wordList = new File("test/testData/wordList.txt");
+        RandomAccessFile r = new RandomAccessFile(wordList, "r");
+
+        // insert 349900 words
+        String line;
+        while ((line = r.readLine()) != null) {
+            assertTrue(trie.insert(line));
+            assertFalse(trie.insert(line));
+            assertTrue(trie.isPresent(line));
+        }
+        assertEquals(349900, trie.membership());
+
+        // delete 349900 words
+        r.seek(0);
+        while ((line = r.readLine()) != null) {
+            assertTrue(trie.delete(line));
+            assertFalse(trie.delete(line));
+            assertFalse(trie.isPresent(line));
+        }
+        assertEquals(0, trie.membership());
+        assertFalse(trie.head.terminal);
     }
 }
