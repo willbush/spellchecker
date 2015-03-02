@@ -1,0 +1,57 @@
+William Bush
+Word inserted
+Word inserted
+Word inserted
+Word inserted
+Word inserted
+Word inserted
+Word inserted
+Word inserted
+Word inserted
+Word inserted
+Word inserted
+Word inserted
+Word inserted
+Membership is   13
+Word deleted
+Word deleted
+Word not present
+Word deleted
+Word not present
+Membership is   10
+Word inserted
+Word inserted
+Word inserted
+Word inserted
+Word inserted
+Word already exists
+Word inserted
+Word found
+Word found
+Word found
+Word not found
+Word found
+Word found
+Word found
+Word found
+Word deleted
+Word not found
+Word found
+Word not found
+Word not found
+alltheworldsastage
+azazazazazazazazazaz
+bat
+batch
+camp
+camper
+can
+cap
+car
+cog
+mouse
+rat
+zombie
+zoo
+zoom
+Membership is   15

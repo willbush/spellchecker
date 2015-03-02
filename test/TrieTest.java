@@ -8,7 +8,7 @@ import java.io.PrintStream;
 import static org.junit.Assert.*;
 
 
-public class WIBUP2Test {
+public class TrieTest {
     private final ByteArrayOutputStream out = new ByteArrayOutputStream();
     private Trie trie;
 
@@ -280,9 +280,5 @@ public class WIBUP2Test {
 
     private int getFirstLetterIndex(String word) {
         return word.charAt(0) - 'a';
-    }
-
-    private int getIndex(char c) {
-        return c - 'a';
     }
 }

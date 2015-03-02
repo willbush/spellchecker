@@ -1,0 +1,38 @@
+William Bush
+Word inserted
+Word inserted
+Word inserted
+Word inserted
+Membership is    4
+Word found
+Word not found
+Word found
+Word found
+Word found
+Word found
+Word not found
+Membership is    4
+Word inserted
+Word inserted
+Membership is    6
+Word not found
+Word found
+Word not found
+Word not found
+Word found
+Word inserted
+Word inserted
+Membership is    8
+Word already exists
+Word inserted
+Word already exists
+Word inserted
+Word not found
+Word not found
+Word not found
+Word not found
+Word found
+Word found
+Word found
+Word found
+Membership is   10

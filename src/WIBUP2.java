@@ -1,3 +1,5 @@
+import java.util.Scanner;
+
 class Node {
     protected static final int ALPHABET_SIZE = 26;
     int outDegree; // the number of children a node has
@@ -137,10 +139,8 @@ class Trie {
     }
 
     private void deleteHeadLetter(Node x, int i) {
-        boolean lastLetterDeleted;
         x.outDegree--;
         x.node[i] = null;
-        lastLetterDeleted = true;
         wordDeleted = true;
     }
 
@@ -204,7 +204,93 @@ class Trie {
 }
 
 public class WIBUP2 {
-    public static void main(String[] args) {
+    private Scanner input;
+    private Trie trie;
 
+    WIBUP2(java.io.InputStream in) {
+        input = new Scanner(in);
+        trie = new Trie();
+    }
+
+    protected void run() {
+        boolean done = false;
+
+        while (!done) {
+            String line = input.nextLine();
+            String[] tokens = line.split(" ");
+            done = handleInput(tokens);
+        }
+    }
+
+    private boolean handleInput(String[] tokens) {
+        boolean done = false;
+
+        switch (tokens[0]) {
+            case "N": {
+                System.out.println("William Bush");
+                break;
+            }
+            case "A": {
+                insert(tokens[1]);
+                break;
+            }
+            case "D": {
+                delete(tokens[1]);
+                break;
+            }
+            case "S": {
+                search(tokens[1]);
+                break;
+            }
+            case "M": {
+                System.out.printf("Membership is %4d\n", trie.membership());
+                break;
+            }
+            case "C": {
+                checkWords(tokens);
+                break;
+            }
+            case "L": {
+                trie.listAll();
+                break;
+            }
+            case "E": {
+                done = true;
+                break;
+            }
+        }
+        return done;
+    }
+
+    private void insert(String word) {
+        if (trie.insert(word))
+            System.out.println("Word inserted");
+        else
+            System.out.println("Word already exists");
+    }
+
+    private void delete(String word) {
+        if (trie.delete(word))
+            System.out.println("Word deleted");
+        else
+            System.out.println("Word not present");
+    }
+
+    private void checkWords(String[] tokens) {
+        for (int i = 1; i < tokens.length; i++)
+            if (!trie.isPresent(tokens[i]))
+                System.out.println("Spelling mistake " + tokens[i]);
+    }
+
+    private void search(String word) {
+        if (trie.isPresent(word))
+            System.out.println("Word found");
+        else
+            System.out.println("Word not found");
+    }
+
+    public static void main(String[] args) {
+        WIBUP2 program = new WIBUP2(System.in);
+        program.run();
     }
 }
