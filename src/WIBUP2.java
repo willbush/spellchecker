@@ -3,7 +3,7 @@ import java.util.Scanner;
 class Node {
     protected static final int ALPHABET_SIZE = 26;
     int outDegree; // the number of children a node has
-    boolean terminal; // true if node represents the last letter in a word
+    boolean terminal; // true if node represents the end of a word
     Children[] node;
 
     Node() {
@@ -22,14 +22,18 @@ class Children extends Node {
 }
 
 class Trie {
-    Node head;
-    private int membership = 0;
-    private boolean wordDeleted;
+    Node head; // head's terminal should always be false
+    private int membership = 0; // the number of words int he trie
+    private boolean wordDeleted; // communicates that the target word was deleted
 
     Trie() {
         head = new Node();
     }
 
+    /**
+     * @param word to insert
+     * @return true if inserted successfully
+     */
     public boolean insert(String word) {
         boolean placed = word.length() > 0 && insert(word, head);
         if (placed)
@@ -42,11 +46,10 @@ class Trie {
             return insertLastLetter(word, x);
 
         int i = getFirstLetterIndex(word);
+        if (!letterIsPresent(x, i))
+            insertLetter(x, i, false);
+
         String prefix = word.substring(1);
-        if (x.node[i] == null) {
-            x.node[i] = new Children(0, false);
-            x.outDegree++;
-        }
         return insert(prefix, x.node[i]);
     }
 
@@ -59,12 +62,20 @@ class Trie {
             x.node[i].terminal = true;
             return true;
         } else {
-            x.node[i] = new Children(0, true);
-            x.outDegree++;
+            insertLetter(x, i, true);
             return true;
         }
     }
 
+    private void insertLetter(Node x, int i, boolean isTerminal) {
+        x.node[i] = new Children(0, isTerminal);
+        x.outDegree++;
+    }
+
+    /**
+     * @param word to check
+     * @return true if word is present
+     */
     public boolean isPresent(String word) {
         Node current = head;
 
@@ -82,57 +93,63 @@ class Trie {
         return false;
     }
 
+    /**
+     * @param word to delete
+     * @return true if deleted
+     */
     public boolean delete(String word) {
         wordDeleted = false;
-        boolean removed = delete(head, word);
+        boolean removed = word.length() > 0 && delete(head, word);
+
         if (removed)
             membership--;
         return removed;
     }
 
     private boolean delete(Node x, String word) {
-        if (word.length() == 1)
-            return deleteLastLetter(x, word);
-        return word.length() > 0 && deletePrefixLetters(x, word);
-    }
-
-    private boolean deletePrefixLetters(Node x, String word) {
-        boolean lastLetterDeleted = false;
         int i = getFirstLetterIndex(word);
-        if (letterIsPresent(x, i)) {
-            lastLetterDeleted = delete(x.node[i], word.substring(1));
-
-            if (!wordDeleted && lastLetterDeleted) {
-                if (isTerminal(x, i) || x.node[i].outDegree > 1) {
-                    x.node[i].outDegree--;
-                    lastLetterDeleted = true;
-                    wordDeleted = true;
-                } else if (x == head) {
-                    deleteHeadLetter(x, i);
-                    lastLetterDeleted = true;
-                } else {
-                    x.node[i] = null;
-                    lastLetterDeleted = true;
-                }
-            }
+        if (word.length() == 1) {
+            return deleteLastLetter(x, i);
         }
-        return lastLetterDeleted;
+        return searchAndDelete(x, word);
     }
 
-    private boolean deleteLastLetter(Node x, String word) {
-        int i = getFirstLetterIndex(word);
+    private boolean deleteLastLetter(Node x, int i) {
+        boolean exist = isTerminal(x, i) || x == head;
         if (isTerminal(x, i) && x.node[i].outDegree > 0) {
             x.node[i].terminal = false;
             wordDeleted = true;
-            return true;
         } else if (x == head) {
             deleteHeadLetter(x, i);
-            return true;
         } else if (isTerminal(x, i)) {
             x.node[i] = null;
-            return true;
         }
-        return false;
+        return exist;
+    }
+
+    private boolean searchAndDelete(Node x, String word) {
+        int i = getFirstLetterIndex(word);
+        // recurse down and verify the word exist
+        boolean wordExist = searchByRecursion(x, i, word);
+
+        // recurse out and delete
+        if (!wordDeleted && wordExist)
+            deleteLetter(x, i);
+        return wordExist;
+    }
+
+    private boolean searchByRecursion(Node x, int i, String word) {
+        return letterIsPresent(x, i) && delete(x.node[i], word.substring(1));
+    }
+
+    private void deleteLetter(Node x, int i) {
+        if (isTerminal(x, i) || x.node[i].outDegree > 1) {
+            x.node[i].outDegree--;
+            wordDeleted = true;
+        } else if (x == head)
+            deleteHeadLetter(x, i);
+        else
+            x.node[i] = null;
     }
 
     private void deleteHeadLetter(Node x, int i) {
@@ -145,6 +162,9 @@ class Trie {
         return word.charAt(0) - 'a';
     }
 
+    /**
+     * prints all words in the trie structure
+     */
     public void listAll() {
         listAll(head, "");
     }
@@ -163,14 +183,14 @@ class Trie {
         }
     }
 
-    private void processPossibleWord(Node x, String s, int i) {
+    private void processPossibleWord(Node x, String word, int i) {
         if (isTerminal(x, i) && x.node[i].outDegree > 0) {
-            System.out.println(s);
-            listAll(x.node[i], s);
+            System.out.println(word);
+            listAll(x.node[i], word);
         } else if (isTerminal(x, i))
-            System.out.println(s);
+            System.out.println(word);
         else
-            listAll(x.node[i], s);
+            listAll(x.node[i], word);
     }
 
     private boolean isTerminal(Node x, int i) {
@@ -185,6 +205,9 @@ class Trie {
         return x.node[i] != null;
     }
 
+    /**
+     * @return number of words in the trie structure
+     */
     public int membership() {
         return membership;
     }
