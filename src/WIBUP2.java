@@ -42,10 +42,11 @@ class Trie {
     }
 
     private boolean insert(String word, Node x) {
-        if (word.length() == 1)
-            return insertLastLetter(word, x);
-
         int i = getFirstLetterIndex(word);
+
+        if (word.length() == 1)
+            return insertLastLetter(i, x);
+
         if (!letterIsPresent(x, i))
             insertLetter(x, i, false);
 
@@ -53,9 +54,7 @@ class Trie {
         return insert(prefix, x.node[i]);
     }
 
-    private boolean insertLastLetter(String word, Node x) {
-        int i = getFirstLetterIndex(word);
-
+    private boolean insertLastLetter(int i, Node x) {
         if (isTerminal(x, i))
             return false; // word already inserted
         else if (letterIsPresent(x, i)) {
@@ -115,16 +114,18 @@ class Trie {
     }
 
     private boolean deleteLastLetter(Node x, int i) {
-        boolean exist = isTerminal(x, i) || x == head;
         if (isTerminal(x, i) && x.node[i].outDegree > 0) {
             x.node[i].terminal = false;
             wordDeleted = true;
+            return true;
         } else if (x == head) {
             deleteHeadLetter(x, i);
+            return true;
         } else if (isTerminal(x, i)) {
             x.node[i] = null;
+            return true;
         }
-        return exist;
+        return false;
     }
 
     private boolean searchAndDelete(Node x, String word) {
