@@ -24,9 +24,6 @@ class Children extends Node {
 class Trie {
     Node head;
     private int membership = 0;
-    // initialized and used by listAll to build the current dictionary of words in the Trie.
-    private String[] dictionary;
-    private int dictIndex;
     private boolean wordDeleted;
 
     Trie() {
@@ -149,15 +146,10 @@ class Trie {
     }
 
     public void listAll() {
-        dictIndex = 0;
-        dictionary = new String[membership];
-        buildDictionary(head, "");
-
-        for (String word : dictionary)
-            System.out.println(word);
+        listAll(head, "");
     }
 
-    private void buildDictionary(Node x, String s) {
+    private void listAll(Node x, String s) {
         int i = 0;
         int outFound = 0;
 
@@ -173,17 +165,12 @@ class Trie {
 
     private void processPossibleWord(Node x, String s, int i) {
         if (isTerminal(x, i) && x.node[i].outDegree > 0) {
-            addToDictionary(s);
-            buildDictionary(x.node[i], s);
+            System.out.println(s);
+            listAll(x.node[i], s);
         } else if (isTerminal(x, i))
-            addToDictionary(s);
+            System.out.println(s);
         else
-            buildDictionary(x.node[i], s);
-    }
-
-    private void addToDictionary(String word) {
-        dictionary[dictIndex] = word;
-        dictIndex++;
+            listAll(x.node[i], s);
     }
 
     private boolean isTerminal(Node x, int i) {

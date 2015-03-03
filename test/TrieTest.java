@@ -242,7 +242,6 @@ public class TrieTest {
         assertEquals(0, trie.head.outDegree);
         assertFalse(trie.head.terminal);
         assertEquals(0, trie.membership());
-
     }
 
     private void deleteWord(String word, String expectedList) {
