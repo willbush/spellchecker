@@ -24,7 +24,6 @@ class Children extends Node {
 class Trie {
     Node head; // head's terminal should always be false
     private int membership = 0; // the number of words int he trie
-    private boolean wordDeleted; // communicates that the target word was deleted
 
     Trie() {
         head = new Node();
@@ -97,66 +96,75 @@ class Trie {
      * @return true if deleted
      */
     public boolean delete(String word) {
-        wordDeleted = false;
-        boolean removed = word.length() > 0 && delete(head, word);
+        int membershipBeforeDelete = membership;
 
-        if (removed)
-            membership--;
-        return removed;
+        if (word.length() > 0)
+            deleteMe(head, word);
+
+        return membershipBeforeDelete - 1 == membership;
     }
 
-    private boolean delete(Node x, String word) {
+    /**
+     * @param x    current node
+     * @param word word to delete
+     * @return true if current letter can be deleted
+     */
+    private boolean deleteMe(Node x, String word) {
         int i = getFirstLetterIndex(word);
-        if (word.length() == 1) {
-            return deleteLastLetter(x, i);
-        }
-        return searchAndDelete(x, word);
+
+        if (word.length() == 1 && lastLetterIsValid(x, i))
+            return canDelete(x, i, word);
+
+        return letterCanBeDeleted(x, i, word) && canDelete(x, i, word);
     }
 
-    private boolean deleteLastLetter(Node x, int i) {
-        if (isTerminal(x, i) && x.node[i].outDegree > 0) {
+    private boolean lastLetterIsValid(Node x, int i) {
+        return x == head || isTerminal(x, i);
+    }
+
+    /*
+    If letter exist then we recurse until the base case is reached.
+    If canDelete successfully removes the word in the base case or while recursing out,
+    then deleteMe will return false and previous prefix letters are not to be deleted (i.e. letterCanBeDeleted == false).
+     */
+    private boolean letterCanBeDeleted(Node x, int i, String word) {
+        return word.length() > 1 && letterIsPresent(x, i) && deleteMe(x.node[i], word.substring(1));
+    }
+
+    /**
+     * @return true if prefix letter can be deleted.
+     * false if word successfully removed and other letter deletions are not needed
+     */
+    private boolean canDelete(Node x, int i, String word) {
+        boolean canDelete = false;
+
+        if (lastLetterIsShared(x, i, word)) {
             x.node[i].terminal = false;
-            wordDeleted = true;
-            return true;
+            membership--;
+        } else if (prefixLetterIsShared(x, i, word)) {
+            x.node[i].outDegree--;
+            membership--;
         } else if (x == head) {
             deleteHeadLetter(x, i);
-            return true;
-        } else if (isTerminal(x, i)) {
+        } else {
             x.node[i] = null;
-            return true;
+            canDelete = true;
         }
-        return false;
+        return canDelete;
     }
 
-    private boolean searchAndDelete(Node x, String word) {
-        int i = getFirstLetterIndex(word);
-        // recurse down and verify the word exist
-        boolean wordExist = searchByRecursion(x, i, word);
-
-        // recurse out and delete
-        if (!wordDeleted && wordExist)
-            deleteLetter(x, i);
-        return wordExist;
+    private boolean lastLetterIsShared(Node x, int i, String word) {
+        return word.length() == 1 && isTerminal(x, i) && x.node[i].outDegree > 0;
     }
 
-    private boolean searchByRecursion(Node x, int i, String word) {
-        return letterIsPresent(x, i) && delete(x.node[i], word.substring(1));
-    }
-
-    private void deleteLetter(Node x, int i) {
-        if (isTerminal(x, i) || x.node[i].outDegree > 1) {
-            x.node[i].outDegree--;
-            wordDeleted = true;
-        } else if (x == head)
-            deleteHeadLetter(x, i);
-        else
-            x.node[i] = null;
+    private boolean prefixLetterIsShared(Node x, int i, String word) {
+        return word.length() > 1 && (isTerminal(x, i) || x.node[i].outDegree > 1);
     }
 
     private void deleteHeadLetter(Node x, int i) {
         x.outDegree--;
+        membership--;
         x.node[i] = null;
-        wordDeleted = true;
     }
 
     private int getFirstLetterIndex(String word) {
