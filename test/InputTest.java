@@ -7,9 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class InputTest {
     private final ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -77,8 +75,8 @@ public class InputTest {
     @Test
     public void memoryStress() throws IOException {
         File wordList = new File("test/testData/wordList.txt");
-        RandomAccessFile r = new RandomAccessFile(wordList, "r");
 
+        RandomAccessFile r = new RandomAccessFile(wordList, "r");
         // insert 349900 words
         String line;
         while ((line = r.readLine()) != null) {
@@ -96,6 +94,10 @@ public class InputTest {
             assertFalse(trie.isPresent(line));
         }
         assertEquals(0, trie.membership());
+        assertEquals(0, trie.head.outDegree);
         assertFalse(trie.head.terminal);
+
+        for (Node n : trie.head.node)
+            assertNull(n);
     }
 }
