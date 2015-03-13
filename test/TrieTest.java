@@ -47,17 +47,17 @@ public class TrieTest {
     @Test
     public void canInsertSimpleLetter() {
         assertTrue(trie.insert("a"));
-        assertEquals(1, trie.membership());
+        assertEquals(1, trie.getWordCount());
         assertTrue(trie.insert("z"));
-        assertEquals(2, trie.membership());
+        assertEquals(2, trie.getWordCount());
 
         assertTrue(trie.isPresent("a"));
         assertTrue(trie.isPresent("z"));
 
         assertTrue(trie.delete("a"));
-        assertEquals(1, trie.membership());
+        assertEquals(1, trie.getWordCount());
         assertTrue(trie.delete("z"));
-        assertEquals(0, trie.membership());
+        assertEquals(0, trie.getWordCount());
 
         assertFalse(trie.isPresent("a"));
         assertFalse(trie.isPresent("z"));
@@ -69,7 +69,7 @@ public class TrieTest {
         insertAndAssert(words, true);
         Node m = getLastNodeOf("tom");
         assertTrue(m.terminal);
-        assertEquals(2, trie.membership());
+        assertEquals(2, trie.getWordCount());
         trie.listAll(); // prints alphabetically
         assertEquals("cat\ntom\n", out.toString());
     }
@@ -81,7 +81,7 @@ public class TrieTest {
         insertAndAssert(words, true);
         insertAndAssert(words, false); // inserting the same words should fail
         assertIsPresent(words, true);
-        assertEquals(3, trie.membership());
+        assertEquals(3, trie.getWordCount());
         assertEquals(3, trie.head.outDegree);
 
         trie.listAll(); // prints alphabetically
@@ -98,7 +98,7 @@ public class TrieTest {
         int[] outDegree = {1, 2, 2, 1, 0};
         boolean[] terminals = {false, false, false, false, true};
         testOutDegreeAndTerminal("vidi", outDegree, terminals);
-        assertEquals(3, trie.membership());
+        assertEquals(3, trie.getWordCount());
 
         trie.listAll(); // prints alphabetically
         assertEquals("veni\nvici\nvidi\n", out.toString());
@@ -110,7 +110,7 @@ public class TrieTest {
         insertAndAssert(words, true);
         insertAndAssert(words, false);
         assertIsPresent(words, true);
-        assertEquals(4, trie.membership());
+        assertEquals(4, trie.getWordCount());
 
 
         Node c = getLastNodeOf("abc");
@@ -126,7 +126,7 @@ public class TrieTest {
     public void canDeleteALetter() {
         assertTrue(trie.insert("a"));
         assertTrue(trie.delete("a"));
-        assertEquals(0, trie.membership());
+        assertEquals(0, trie.getWordCount());
         assertEquals(0, trie.head.outDegree);
         assertFalse(trie.head.terminal);
     }
@@ -135,7 +135,7 @@ public class TrieTest {
     public void canDeleteTwoBranchingWords() {
         assertTrue(trie.insert("as"));
         assertTrue(trie.insert("at"));
-        assertEquals(2, trie.membership());
+        assertEquals(2, trie.getWordCount());
 
         assertTrue(trie.delete("as"));
         assertFalse(trie.isPresent("as"));
@@ -144,7 +144,7 @@ public class TrieTest {
         assertTrue(trie.delete("at"));
         assertFalse(trie.isPresent("at"));
         assertFalse(trie.isPresent("as"));
-        assertEquals(0, trie.membership());
+        assertEquals(0, trie.getWordCount());
     }
 
     @Test
@@ -157,7 +157,7 @@ public class TrieTest {
         String[] nonInsertedWords = {"th", "thi", "ti", "s"};
         assertIsPresent(nonInsertedWords, false);
 
-        assertEquals(9, trie.membership());
+        assertEquals(9, trie.getWordCount());
 
         int[] theOutDegrees = {2, 2, 2, 0};
         boolean[] theTerminals = {false, false, false, true};
@@ -205,8 +205,8 @@ public class TrieTest {
         boolean[] thinTerminals = {false, false, false, false, true};
         testOutDegreeAndTerminal("thin", thinOutDegrees, thinTerminals);
 
-        // check membership
-        assertEquals(5, trie.membership());
+        // check getWordCount
+        assertEquals(5, trie.getWordCount());
 
         // delete thin
         expectedList = "sin\nsing\ntin\ntint\n";
@@ -241,7 +241,7 @@ public class TrieTest {
         deleteWord("tint", expectedList);
         assertEquals(0, trie.head.outDegree);
         assertFalse(trie.head.terminal);
-        assertEquals(0, trie.membership());
+        assertEquals(0, trie.getWordCount());
     }
 
     private void deleteWord(String word, String expectedList) {

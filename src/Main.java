@@ -22,8 +22,8 @@ class Children extends Node {
 }
 
 class Trie {
-    Node head; // head's terminal should always be false
-    private int membership = 0; // the number of words in the trie
+    Node head;
+    private int wordCount = 0; // the number of words in the trie
 
     Trie() {
         head = new Node();
@@ -36,7 +36,7 @@ class Trie {
     public boolean insert(String word) {
         boolean placed = word.length() > 0 && insert(word, head);
         if (placed)
-            membership++;
+            wordCount++;
         return placed;
     }
 
@@ -71,7 +71,7 @@ class Trie {
     }
 
     /**
-     * @param word to check
+     * @param word to check if present
      * @return true if word is present
      */
     public boolean isPresent(String word) {
@@ -93,79 +93,87 @@ class Trie {
 
     /**
      * @param word to delete
-     * @return true if deleted
+     * @return true if word deleted
      */
     public boolean delete(String word) {
-        int membershipBeforeDelete = membership;
+        int wordCountBeforeDelete = wordCount;
 
         if (word.length() > 0)
-            deleteMe(head, word);
+            canDelete(head, word);
 
-        return membershipBeforeDelete - 1 == membership;
+        return wordCountBeforeDelete - 1 == wordCount;
     }
 
     /**
+     * This method recursively verifies the words existence, then starts
+     * deleting letters while recursing out. If delete successfully removes the
+     * word, it will return false. Once delete returns false once all the
+     * canDelete out recursion will also be false because the prefix letters are
+     * shared with another word in the trie structure.
+     *
      * @param x    current node
      * @param word word to delete
      * @return true if current letter can be deleted
      */
-    private boolean deleteMe(Node x, String word) {
+    private boolean canDelete(Node x, String word) {
+        boolean canDelete = false;
         int i = getFirstLetterIndex(word);
         int length = word.length();
 
         if (length == 1 && lastLetterIsValid(x, i))
-            return canDelete(x, i, length);
+            canDelete = delete(x, i, length);
 
-        return letterCanBeDeleted(x, i, word) && canDelete(x, i, length);
+        else if (length > 1 && letterIsPresent(x, i))
+            canDelete = canDelete(x.node[i], word.substring(1)) && delete(x, i, length);
+
+        return canDelete;
     }
 
     private boolean lastLetterIsValid(Node x, int i) {
         return x == head || isTerminal(x, i);
     }
 
-    /*
-    If the letter exist then we recurse until the base case is reached.
-    If canDelete successfully removes the word in the base case or while recursing out,
-    then deleteMe will return false and previous prefix letters are not to be deleted
-    (i.e. letterCanBeDeleted == false).
-     */
-    private boolean letterCanBeDeleted(Node x, int i, String word) {
-        return word.length() > 1 && letterIsPresent(x, i) && deleteMe(x.node[i], word.substring(1));
-    }
-
     /**
+     * Deletes letter at x i.
+     *
      * @return true if prefix letter can be deleted.
      * false if word successfully removed and other letter deletions are not needed
      */
-    private boolean canDelete(Node x, int i, int length) {
-        boolean canDelete = false;
+    private boolean delete(Node x, int i, int length) {
+        boolean canDeleteNext = false;
 
         if (lastLetterIsShared(x, i, length)) {
             x.node[i].terminal = false;
-            membership--;
+            wordCount--;
         } else if (prefixLetterIsShared(x, i, length)) {
             x.node[i].outDegree--;
-            membership--;
+            wordCount--;
         } else if (x == head) {
             deleteHeadLetter(x, i);
         } else {
             x.node[i] = null;
-            canDelete = true;
+            canDeleteNext = true;
         }
-        return canDelete;
+        return canDeleteNext;
     }
 
+    /**
+     * @return true if last letter is shared with another word in the trie.
+     */
     private boolean lastLetterIsShared(Node x, int i, int length) {
         return length == 1 && isTerminal(x, i) && x.node[i].outDegree > 0;
     }
 
+    /**
+     * @return true if letter is shared with another word in the trie.
+     */
     private boolean prefixLetterIsShared(Node x, int i, int length) {
         return length > 1 && (isTerminal(x, i) || x.node[i].outDegree > 1);
     }
 
     private void deleteHeadLetter(Node x, int i) {
         x.outDegree--;
-        membership--;
+        wordCount--;
         x.node[i] = null;
     }
 
@@ -216,19 +224,16 @@ class Trie {
         return x.node[i] != null;
     }
 
-    /**
-     * @return number of words in the trie structure
-     */
-    public int membership() {
-        return membership;
+    public int getWordCount() {
+        return wordCount;
     }
 }
 
-public class WIBUP2 {
+public class Main {
     private Scanner input;
     private Trie trie;
 
-    WIBUP2(java.io.InputStream in) {
+    Main(java.io.InputStream in) {
         input = new Scanner(in);
         trie = new Trie();
     }
@@ -264,7 +269,7 @@ public class WIBUP2 {
                 break;
             }
             case "M": {
-                System.out.printf("Membership is %4d\n", trie.membership());
+                System.out.printf("Membership is %4d\n", trie.getWordCount());
                 break;
             }
             case "C": {
@@ -311,7 +316,7 @@ public class WIBUP2 {
     }
 
     public static void main(String[] args) {
-        WIBUP2 program = new WIBUP2(System.in);
+        Main program = new Main(System.in);
         program.run();
     }
 }

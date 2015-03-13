@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 
 public class InputTest {
     private final ByteArrayOutputStream out = new ByteArrayOutputStream();
-    private WIBUP2 program;
+    private Main program;
     private Trie trie;
 
     @Before
@@ -61,10 +61,10 @@ public class InputTest {
         assertEquals(expectedOut, out.toString());
     }
 
-    private WIBUP2 getProgram(String path) throws IOException {
+    private Main getProgram(String path) throws IOException {
         File input = new File(path);
         InputStream in = new FileInputStream(input);
-        return new WIBUP2(in);
+        return new Main(in);
     }
 
     private String getOutputString(String path) throws IOException {
@@ -84,7 +84,7 @@ public class InputTest {
             assertFalse(trie.insert(line));
             assertTrue(trie.isPresent(line));
         }
-        assertEquals(349900, trie.membership());
+        assertEquals(349900, trie.getWordCount());
 
         // delete 349900 words
         r.seek(0);
@@ -93,7 +93,7 @@ public class InputTest {
             assertFalse(trie.delete(line));
             assertFalse(trie.isPresent(line));
         }
-        assertEquals(0, trie.membership());
+        assertEquals(0, trie.getWordCount());
         assertEquals(0, trie.head.outDegree);
         assertFalse(trie.head.terminal);
 
