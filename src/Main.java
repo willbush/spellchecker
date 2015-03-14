@@ -106,10 +106,10 @@ class Trie {
 
     /**
      * This method recursively verifies the words existence, then starts
-     * deleting letters while recursing out. If delete successfully removes the
-     * word, it will return false. Once delete returns false once all the
-     * canDelete out recursion will also be false because the prefix letters are
-     * shared with another word in the trie structure.
+     * deleting letters in the base case and while recursing out. If delete
+     * successfully removes the word, it will return false, and all other
+     * canDelete out recursion will also be false because the prefix
+     * letters are shared with another word in the trie structure.
      *
      * @param x    current node
      * @param word word to delete
@@ -134,7 +134,8 @@ class Trie {
     }
 
     /**
-     * Deletes letter at x i.
+     * Deletes letter if it is not shared. If letter is shared it makes appropriate
+     * modifications to the trie structure by changing the outDegree or terminal of a node.
      *
      * @return true if prefix letter can be deleted.
      * false if word successfully removed and other letter deletions are not needed
@@ -142,18 +143,17 @@ class Trie {
     private boolean delete(Node x, int i, int length) {
         boolean canDeleteNext = false;
 
-        if (lastLetterIsShared(x, i, length)) {
-            x.node[i].terminal = false;
-            wordCount--;
-        } else if (prefixLetterIsShared(x, i, length)) {
-            x.node[i].outDegree--;
-            wordCount--;
-        } else if (x == head) {
-            deleteHeadLetter(x, i);
-        } else {
-            x.node[i] = null;
+        if (lastLetterIsShared(x, i, length))
+            removeWordByTurningTerminalOff(x, i);
+        else if (prefixLetterIsShared(x, i, length))
+            removeWordByDecrementingOutDegree(x, i);
+        else if (x == head)
+            removeWordByDeletingHeadLetter(x, i);
+        else {
+            deleteLetter(x, i);
             canDeleteNext = true;
         }
+
         return canDeleteNext;
     }
 
@@ -164,6 +164,15 @@ class Trie {
         return length == 1 && isTerminal(x, i) && x.node[i].outDegree > 0;
     }
 
+    /*
+    Example: If removing "so" when "song" exist in the trie, then only the
+    terminal for "o" needs to be set to false.
+     */
+    private void removeWordByTurningTerminalOff(Node x, int i) {
+        x.node[i].terminal = false;
+        wordCount--;
+    }
+
     /**
      * @return true if letter is shared with another word in the trie.
      */
@@ -171,12 +180,34 @@ class Trie {
         return length > 1 && (isTerminal(x, i) || x.node[i].outDegree > 1);
     }
 
-    private void deleteHeadLetter(Node x, int i) {
+    /*
+    Example: If deleting "the" when "that" exist in the trie, previous letter
+    "e" was already deleted and now we are at "h" which is a prefix letter and
+    it is shared with "that". In this situation only the outDegree of "h" needs
+    to be decremented to successfully remove the word "the". Also works for
+    situations like deleting "song" when "so" already exist in the trie.
+     */
+    private void removeWordByDecrementingOutDegree(Node x, int i) {
+        x.node[i].outDegree--;
+        wordCount--;
+    }
+
+    /*
+    Occurs when none of the letters from the word to be deleted are shared.
+     */
+    private void removeWordByDeletingHeadLetter(Node x, int i) {
         x.outDegree--;
         wordCount--;
+        deleteLetter(x, i);
+    }
+
+    private void deleteLetter(Node x, int i) {
         x.node[i] = null;
     }
 
+    /**
+     * @return index of a lowercase letter such that a = 0, b = 1, ..., z = 25
+     */
     private int getFirstLetterIndex(String word) {
         return word.charAt(0) - 'a';
     }
