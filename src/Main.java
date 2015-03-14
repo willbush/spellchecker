@@ -106,7 +106,7 @@ class Trie {
 
     /**
      * This method recursively verifies the words existence, then starts
-     * deleting letters in the base case and while recursing out. If delete
+     * deleting letters in the base case and while recursing out. If canDeleteNext
      * successfully removes the word, it will return false, and all other
      * canDelete out recursion will also be false because the prefix
      * letters are shared with another word in the trie structure.
@@ -121,10 +121,10 @@ class Trie {
         int length = word.length();
 
         if (length == 1 && lastLetterIsValid(x, i))
-            canDelete = delete(x, i, length);
+            canDelete = canDeleteNext(x, i, length);
 
         else if (length > 1 && letterIsPresent(x, i))
-            canDelete = canDelete(x.node[i], word.substring(1)) && delete(x, i, length);
+            canDelete = canDelete(x.node[i], word.substring(1)) && canDeleteNext(x, i, length);
 
         return canDelete;
     }
@@ -137,10 +137,10 @@ class Trie {
      * Deletes letter if it is not shared. If letter is shared it makes appropriate
      * modifications to the trie structure by changing the outDegree or terminal of a node.
      *
-     * @return true if prefix letter can be deleted.
+     * @return true if next prefix letter can be deleted.
      * false if word successfully removed and other letter deletions are not needed
      */
-    private boolean delete(Node x, int i, int length) {
+    private boolean canDeleteNext(Node x, int i, int length) {
         boolean canDeleteNext = false;
 
         if (lastLetterIsShared(x, i, length))
