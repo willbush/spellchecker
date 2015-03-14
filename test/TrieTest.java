@@ -27,7 +27,7 @@ public class TrieTest {
     public void canCreateEmptyNode() {
         Node n = new Node();
         assertEquals(0, n.outDegree);
-        assertFalse(n.terminal);
+        assertFalse(n.isTerminal);
         assertEquals(26, n.node.length);
         assertNull(n.node[0]); // first element
         assertNull(n.node[25]); // last element
@@ -35,7 +35,7 @@ public class TrieTest {
 
     @Test
     public void canListEmptyTrie() {
-        trie.listAll();
+        trie.printAllWords();
         assertEquals("", out.toString());
     }
 
@@ -68,9 +68,9 @@ public class TrieTest {
         String[] words = {"tom", "cat"};
         insertAndAssert(words, true);
         Node m = getLastNodeOf("tom");
-        assertTrue(m.terminal);
+        assertTrue(m.isTerminal);
         assertEquals(2, trie.getWordCount());
-        trie.listAll(); // prints alphabetically
+        trie.printAllWords(); // prints alphabetically
         assertEquals("cat\ntom\n", out.toString());
     }
 
@@ -84,7 +84,7 @@ public class TrieTest {
         assertEquals(3, trie.getWordCount());
         assertEquals(3, trie.head.outDegree);
 
-        trie.listAll(); // prints alphabetically
+        trie.printAllWords(); // prints alphabetically
         assertEquals("alice\nbob\njoe\n", out.toString());
     }
 
@@ -100,7 +100,7 @@ public class TrieTest {
         testOutDegreeAndTerminal("vidi", outDegree, terminals);
         assertEquals(3, trie.getWordCount());
 
-        trie.listAll(); // prints alphabetically
+        trie.printAllWords(); // prints alphabetically
         assertEquals("veni\nvici\nvidi\n", out.toString());
     }
 
@@ -128,7 +128,7 @@ public class TrieTest {
         assertTrue(trie.delete("a"));
         assertEquals(0, trie.getWordCount());
         assertEquals(0, trie.head.outDegree);
-        assertFalse(trie.head.terminal);
+        assertFalse(trie.head.isTerminal);
     }
 
     @Test
@@ -172,7 +172,7 @@ public class TrieTest {
 
         // test if can list alphabetically
         String expectedList = "sin\nsing\nso\nson\nsong\nthe\nthin\ntin\ntint\n";
-        trie.listAll();
+        trie.printAllWords();
         assertEquals(expectedList, out.toString());
     }
 
@@ -240,7 +240,7 @@ public class TrieTest {
         expectedList = "";
         deleteWord("tint", expectedList);
         assertEquals(0, trie.head.outDegree);
-        assertFalse(trie.head.terminal);
+        assertFalse(trie.head.isTerminal);
         assertEquals(0, trie.getWordCount());
     }
 
@@ -249,7 +249,7 @@ public class TrieTest {
         assertFalse(trie.delete(word));
         assertFalse(trie.isPresent(word));
         out.reset();
-        trie.listAll();
+        trie.printAllWords();
         assertEquals(expectedList, out.toString());
     }
 
@@ -285,7 +285,7 @@ public class TrieTest {
         while (word.length() > 0) {
             int firstLetterIndex = getFirstLetterIndex(word);
             assertEquals(outDegrees[i], current.outDegree);
-            assertEquals(terminals[i], current.terminal);
+            assertEquals(terminals[i], current.isTerminal);
             word = word.substring(1);
             current = current.node[firstLetterIndex];
             i++;

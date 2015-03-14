@@ -95,7 +95,7 @@ public class InputTest {
         }
         assertEquals(0, trie.getWordCount());
         assertEquals(0, trie.head.outDegree);
-        assertFalse(trie.head.terminal);
+        assertFalse(trie.head.isTerminal);
 
         for (Node n : trie.head.node)
             assertNull(n);

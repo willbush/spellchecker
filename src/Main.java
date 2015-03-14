@@ -2,13 +2,13 @@ import java.util.Scanner;
 
 class Node {
     protected static final int ALPHABET_SIZE = 26;
-    int outDegree; // the number of children a node has
-    boolean terminal; // true if node represents the end of a word
+    int outDegree; // the number of direct children a node has
+    boolean isTerminal; // true if node represents the end of a word
     Children[] node;
 
     Node() {
         outDegree = 0;
-        terminal = false;
+        isTerminal = false;
         node = new Children[ALPHABET_SIZE];
     }
 }
@@ -16,21 +16,20 @@ class Node {
 class Children extends Node {
     Children(int outDegree, boolean terminal) {
         this.outDegree = outDegree;
-        this.terminal = terminal;
+        this.isTerminal = terminal;
         node = new Children[ALPHABET_SIZE];
     }
 }
 
 class Trie {
+    private int wordCount = 0;
     Node head;
-    private int wordCount = 0; // the number of words in the trie
 
     Trie() {
         head = new Node();
     }
 
     /**
-     * @param word to insert
      * @return true if inserted successfully
      */
     public boolean insert(String word) {
@@ -57,7 +56,7 @@ class Trie {
         if (isTerminal(x, i))
             return false; // word already inserted
         else if (letterIsPresent(x, i)) {
-            x.node[i].terminal = true;
+            x.node[i].isTerminal = true;
             return true;
         } else {
             insertLetter(x, i, true);
@@ -71,7 +70,6 @@ class Trie {
     }
 
     /**
-     * @param word to check if present
      * @return true if word is present
      */
     public boolean isPresent(String word) {
@@ -92,7 +90,6 @@ class Trie {
     }
 
     /**
-     * @param word to delete
      * @return true if word deleted
      */
     public boolean delete(String word) {
@@ -111,8 +108,6 @@ class Trie {
      * canDelete out recursion will also be false because the prefix
      * letters are shared with another word in the trie structure.
      *
-     * @param x    current node
-     * @param word word to delete
      * @return true if current letter can be deleted
      */
     private boolean canDelete(Node x, String word) {
@@ -169,12 +164,12 @@ class Trie {
     terminal for "o" needs to be set to false.
      */
     private void removeWordByTurningTerminalOff(Node x, int i) {
-        x.node[i].terminal = false;
+        x.node[i].isTerminal = false;
         wordCount--;
     }
 
     /**
-     * @return true if letter is shared with another word in the trie.
+     * @return true if prefix letter is shared with another word in the trie.
      */
     private boolean prefixLetterIsShared(Node x, int i, int length) {
         return length > 1 && (isTerminal(x, i) || x.node[i].outDegree > 1);
@@ -206,20 +201,18 @@ class Trie {
     }
 
     /**
-     * @return index of a lowercase letter such that a = 0, b = 1, ..., z = 25
+     * @return index of the first letter in a word (assuming word is lowercase)
+     * such that a = 0, b = 1, ..., z = 25
      */
     private int getFirstLetterIndex(String word) {
         return word.charAt(0) - 'a';
     }
 
-    /**
-     * prints all words in the trie structure
-     */
-    public void listAll() {
-        listAll(head, "");
+    public void printAllWords() {
+        printAllWords(head, "");
     }
 
-    private void listAll(Node x, String s) {
+    private void printAllWords(Node x, String s) {
         int i = 0;
         int outFound = 0;
 
@@ -236,15 +229,15 @@ class Trie {
     private void processPossibleWord(Node x, String word, int i) {
         if (isTerminal(x, i) && x.node[i].outDegree > 0) {
             System.out.println(word);
-            listAll(x.node[i], word);
+            printAllWords(x.node[i], word);
         } else if (isTerminal(x, i))
             System.out.println(word);
         else
-            listAll(x.node[i], word);
+            printAllWords(x.node[i], word);
     }
 
     private boolean isTerminal(Node x, int i) {
-        return x.node[i] != null && x.node[i].terminal;
+        return x.node[i] != null && x.node[i].isTerminal;
     }
 
     private char getLetter(int i) {
@@ -308,7 +301,7 @@ public class Main {
                 break;
             }
             case "L": {
-                trie.listAll();
+                trie.printAllWords();
                 break;
             }
             case "E": {
