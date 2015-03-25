@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 
 public class InputTest {
     private final ByteArrayOutputStream out = new ByteArrayOutputStream();
-    private Main program;
+    private Spellcheck program;
     private Trie trie;
 
     @Before
@@ -61,10 +61,10 @@ public class InputTest {
         assertEquals(expectedOut, out.toString());
     }
 
-    private Main getProgram(String path) throws IOException {
+    private Spellcheck getProgram(String path) throws IOException {
         File input = new File(path);
         InputStream in = new FileInputStream(input);
-        return new Main(in);
+        return new Spellcheck(in);
     }
 
     private String getOutputString(String path) throws IOException {

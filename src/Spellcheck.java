@@ -253,27 +253,26 @@ class Trie {
     }
 }
 
-public class Main {
+public class Spellcheck {
     private Scanner input;
     private Trie trie;
 
-    Main(java.io.InputStream in) {
+    Spellcheck(java.io.InputStream in) {
         input = new Scanner(in);
         trie = new Trie();
     }
 
     protected void run() {
-        boolean done = false;
+        String[] tokens;
 
-        while (!done) {
+        do {
             String line = input.nextLine();
-            String[] tokens = line.split(" ");
-            done = handleInput(tokens);
-        }
+            tokens = line.split(" ");
+        } while (inputHasNext(tokens));
     }
 
-    private boolean handleInput(String[] tokens) {
-        boolean done = false;
+    private boolean inputHasNext(String[] tokens) {
+        boolean hasNext = true;
 
         switch (tokens[0]) {
             case "N": {
@@ -305,11 +304,11 @@ public class Main {
                 break;
             }
             case "E": {
-                done = true;
+                hasNext = false;
                 break;
             }
         }
-        return done;
+        return hasNext;
     }
 
     private void insert(String word) {
@@ -340,7 +339,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        Main program = new Main(System.in);
+        Spellcheck program = new Spellcheck(System.in);
         program.run();
     }
 }
