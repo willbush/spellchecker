@@ -268,47 +268,44 @@ public class Spellcheck {
         do {
             String line = input.nextLine();
             tokens = line.split(" ");
-        } while (inputHasNext(tokens));
+            performCommands(tokens);
+        } while (inputHasNext(tokens[0]));
     }
 
-    private boolean inputHasNext(String[] tokens) {
-        boolean hasNext = true;
-
+    private void performCommands(String[] tokens) {
         switch (tokens[0]) {
-            case "N": {
+            case "N":
                 System.out.println("William Bush");
                 break;
-            }
-            case "A": {
+
+            case "A":
                 insert(tokens[1]);
                 break;
-            }
-            case "D": {
+
+            case "D":
                 delete(tokens[1]);
                 break;
-            }
-            case "S": {
+
+            case "S":
                 search(tokens[1]);
                 break;
-            }
-            case "M": {
+
+            case "M":
                 System.out.printf("Membership is %4d\n", trie.getWordCount());
                 break;
-            }
-            case "C": {
+
+            case "C":
                 checkWords(tokens);
                 break;
-            }
-            case "L": {
+
+            case "L":
                 trie.printAllWords();
                 break;
-            }
-            case "E": {
-                hasNext = false;
-                break;
-            }
         }
-        return hasNext;
+    }
+
+    private boolean inputHasNext(String command) {
+        return !command.equals("E");
     }
 
     private void insert(String word) {
